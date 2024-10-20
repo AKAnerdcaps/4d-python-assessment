@@ -31,11 +31,7 @@ PRODUCT_CONFIG = {
     "file_pattern": r'products_\d{4}\d{2}\d{2}\.json',
     "key_columns": ["product_id"],
     "data_type": 'full',
-    "file_type": "json",
-    "read_args": {
-        "sep": "~",
-        "names": list(map(lambda x: x['name'], PRODUCT_SCHEMA)),
-    }
+    "file_type": "json"
 }
 
 CONFIGS = {

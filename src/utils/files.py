@@ -34,6 +34,10 @@ def read_parquet(filepath):
     sys_logger.info(f"Reading parquet file from {filepath}")
     return pd.read_parquet(filepath)
 
+def read_json(filepath, **kwargs):
+    sys_logger.info(f"Reading json file from {filepath} with kwargs {kwargs}")
+    return pd.read_json(filepath, **kwargs)
+
 def get_read_func(type):
     match type:
         case "csv":
@@ -42,6 +46,8 @@ def get_read_func(type):
             return read_excel
         case "parquet":
             return read_parquet
+        case "json":
+            return read_json
         case _:
             raise ValueError(f"Unsupported file type: {type}")
     
