@@ -1,4 +1,4 @@
-from src.configs.schemas import CUSTOMER_SCHEMA, SALES_SCHEMA
+from src.configs.schemas import CUSTOMER_SCHEMA, SALES_SCHEMA, PRODUCT_SCHEMA
 
 CUSTOMER_CONFIG = {
     "schema": CUSTOMER_SCHEMA,
@@ -25,8 +25,21 @@ SALES_CONFIG = {
     }
 }
 
+PRODUCT_CONFIG = {
+    "schema": PRODUCT_SCHEMA,
+    "location": "./data/products/",
+    "file_pattern": r'products_\d{4}\d{2}\d{2}\.json',
+    "key_columns": ["product_id"],
+    "data_type": 'full',
+    "file_type": "json",
+    "read_args": {
+        "sep": "~",
+        "names": list(map(lambda x: x['name'], PRODUCT_SCHEMA)),
+    }
+}
+
 CONFIGS = {
     "customer": CUSTOMER_CONFIG,
     "sales": SALES_CONFIG,
-    # "product": PRODUCT_CONFIG
+    "product": PRODUCT_CONFIG
 }
