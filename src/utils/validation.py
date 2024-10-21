@@ -15,13 +15,19 @@ def validate_field(field_value, field_info):
     if pd.isnull(field_value):
         return True, ""
 
-    # Type Validation
+    # Type Validation    
     if field_type == 'int':
-        if not isinstance(field_value, int):
+        try:
+            int_value = int(field_value)
+            return True, ""
+        except (ValueError, TypeError):
             return False, f"Invalid type for field: {field_info['name']}. Expected int but got {type(field_value).__name__}"
 
     elif field_type == 'float':
-        if not isinstance(field_value, float):
+        try:
+            float_value = float(field_value)
+            return True, ""
+        except (ValueError, TypeError):
             return False, f"Invalid type for field: {field_info['name']}. Expected float but got {type(field_value).__name__}"
 
     elif field_type == 'string':
@@ -37,6 +43,7 @@ def validate_field(field_value, field_info):
             datetime.strptime(field_value, field_info['format'])
         except ValueError:
             return False, f"Invalid date format for field: {field_info['name']}. Expected format {field_info['format']} but got {field_value}"
+    
     return True, ""
 
 def validate_data(schema, dataframe):
@@ -58,11 +65,27 @@ def validate_data(schema, dataframe):
                 row_errors.append(error_message)
 
         if row_errors:
+            record['errors'] = row_errors
             error_rows.append(record)
         else:
             clean_rows.append(record)
 
     error_df = pd.DataFrame(error_rows)
     clean_df = pd.DataFrame(clean_rows)
+
+    # Cast to expected type, avoid issues with arrow
+    for field in schema:
+        field_name = field['name']
+        field_type = field['type']
+        
+        if field_name in clean_df.columns:
+            if field_type == 'float':
+                clean_df[field_name] = pd.to_numeric(clean_df[field_name], errors='coerce')
+            elif field_type == 'int':
+                clean_df[field_name] = pd.to_numeric(clean_df[field_name], errors='coerce').astype('Int64')
+            elif field_type == 'string':
+                clean_df[field_name] = clean_df[field_name].astype(str)
+            elif field_type == 'date':
+                clean_df[field_name] = pd.to_datetime(clean_df[field_name], format=field.get('format', '%Y-%m-%d'), errors='coerce')
 
     return clean_df, error_df
