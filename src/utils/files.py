@@ -18,6 +18,10 @@ def get_save_filename(source_name):
     sys_logger.info(f"Getting save filename for {source_name}")
     return f"./final_data/{source_name}.parquet"
 
+def get_error_filename(source_name, date):
+    sys_logger.info(f"Getting error filename for {source_name}")
+    return f"./error_reports/errors_{source_name}_{date}.csv"
+
 def save_file(filepath, dataframe):
     sys_logger.info(f"Saving file with {len(dataframe)} rows to {filepath}")
     dataframe.to_parquet(filepath, index=False)

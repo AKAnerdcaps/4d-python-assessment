@@ -1,6 +1,6 @@
 from src.utils.logger import sys_logger
 from src.utils.constants import SYSTEM_COLS
-from src.utils.files import get_saved_file, save_file, get_save_filename
+from src.utils.files import get_saved_file, save_file, get_save_filename, get_error_filename
 from src.utils.validation import validate_data
 import pandas as pd
 from uuid import uuid4
@@ -137,21 +137,22 @@ def process_data(source_name, dataframe, config, date):
 
     current_table = get_saved_file(source_name)
 
-    clean_records, error_records = validate_data(source_name, dataframe)
+    schema = config.get('schema')
+    clean_records, error_records = validate_data(schema, dataframe)
 
-    if len(error_records) > 0:
-        sys_logger.warning(f"Found {len(error_records)} error records for {source_name}")
-        #TODO: save error records to a file
+    sys_logger.warning(f"Found {len(error_records)} error records for {source_name}")
+    error_records.to_csv(get_error_filename(source_name, date.strftime('%Y%m%d')), index=False)
 
-    new_table = apply_scd2(
-        current_table,
-        clean_records,
-        key_cols,
-        date,
-        is_full,
-    )
+    if len(clean_records) > 0:
+        new_table = apply_scd2(
+            current_table,
+            clean_records,
+            key_cols,
+            date,
+            is_full,
+        )
 
-    save_file(get_save_filename(source_name), new_table)
+        save_file(get_save_filename(source_name), new_table)
 
     stats = {
         "source": source_name,
